@@ -1,7 +1,15 @@
 import React from 'react';
 import { MapPin, AlertTriangle, TrendingUp, Users } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 
-interface CrimeData {
+type Coordinates = {
+  lat: number;
+  lng: number;
+};
+
+type CrimeData = {
   location: string;
   riskLevel: string;
   confidence: number;
@@ -9,7 +17,8 @@ interface CrimeData {
   trendDirection: string;
   safetyScore: number;
   recommendations: string[];
-}
+  coordinates?: Coordinates;
+};
 
 interface SafetyMapProps {
   crimeData: CrimeData | null;
@@ -76,7 +85,7 @@ const SafetyMap: React.FC<SafetyMapProps> = ({ crimeData, getRiskColor }) => {
             <Users className="w-5 h-5 text-green-500" />
           </div>
           <ul className="space-y-3">
-            {crimeData.recommendations.map((tip, index) => (
+            {crimeData.recommendations.map((tip: string, index: number) => (
               <li key={index} className="flex items-start space-x-2">
                 <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
                 <span className="text-sm text-gray-700">{tip}</span>
@@ -85,7 +94,7 @@ const SafetyMap: React.FC<SafetyMapProps> = ({ crimeData, getRiskColor }) => {
           </ul>
         </div>
       </div>
-      {/* Map Placeholder */}
+      {/* Leaflet Map Integration */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
         <div className="bg-gray-100 px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 flex items-center">
@@ -96,14 +105,42 @@ const SafetyMap: React.FC<SafetyMapProps> = ({ crimeData, getRiskColor }) => {
             Crime data visualization for {crimeData.location}
           </p>
         </div>
-        <div className="h-96 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-          <div className="text-center">
-            <MapPin className="w-16 h-16 text-blue-400 mx-auto mb-4" />
-            <p className="text-gray-600 font-medium">Interactive Map Integration</p>
-            <p className="text-sm text-gray-500 mt-2">
-              Leaflet.js map with crime data visualization will be integrated here
-            </p>
-          </div>
+        <div className="h-96">
+          {crimeData.coordinates ? (
+            <MapContainer
+              center={[crimeData.coordinates.lat, crimeData.coordinates.lng] as [number, number]}
+              zoom={14}
+              style={{ height: '100%', width: '100%' }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution="&copy; OpenStreetMap contributors"
+              />
+              <Marker
+                position={[crimeData.coordinates.lat, crimeData.coordinates.lng] as [number, number]}
+                icon={L.icon({
+                  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                  iconSize: [25, 41],
+                  iconAnchor: [12, 41],
+                  popupAnchor: [1, -34],
+                  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                  shadowSize: [41, 41],
+                })}
+              >
+                <Popup>
+                  <strong>{crimeData.location}</strong><br />
+                  Risk: {crimeData.riskLevel}
+                </Popup>
+              </Marker>
+            </MapContainer>
+          ) : (
+            <div className="h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+              <div className="text-center">
+                <MapPin className="w-16 h-16 text-blue-400 mx-auto mb-4" />
+                <p className="text-gray-600 font-medium">No coordinates available for this location.</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

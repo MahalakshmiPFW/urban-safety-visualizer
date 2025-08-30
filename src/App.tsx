@@ -14,6 +14,10 @@ type CrimeData = {
   trendDirection: string;
   safetyScore: number;
   recommendations: string[];
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
 };
 
 type ImageAnalysis = {
@@ -35,7 +39,20 @@ const App: React.FC = () => {
   // Simulate fetching crime data
   const fetchCrimeData = async (searchLocation: string): Promise<CrimeData> => {
     setIsLoadingCrimeData(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Geocode using OpenStreetMap Nominatim
+    let lat = 40.7128;
+    let lng = -74.0060;
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchLocation)}`);
+      const results = await response.json();
+      if (results && results.length > 0) {
+        lat = parseFloat(results[0].lat);
+        lng = parseFloat(results[0].lon);
+      }
+    } catch (e) {
+      // fallback to NYC
+    }
+    await new Promise(resolve => setTimeout(resolve, 1000));
     const mockData: CrimeData = {
       location: searchLocation,
       riskLevel: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)],
@@ -49,6 +66,10 @@ const App: React.FC = () => {
         'Police patrol frequency is high in this area',
         'Consider using rideshare services at night'
       ],
+      coordinates: {
+        lat,
+        lng
+      }
     };
     setIsLoadingCrimeData(false);
     return mockData;

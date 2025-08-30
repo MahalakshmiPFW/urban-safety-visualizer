@@ -7,7 +7,7 @@ A modern, user-friendly React app for visualizing urban safety and crime risk by
 - **Live Map:** Interactive map updates to the exact location using OpenStreetMap geocoding and Leaflet.
 - **Activity Detector:** Upload images to simulate AI-based suspicious activity detection (mocked for demo).
 - **Responsive UI:** Built with Tailwind CSS for a clean, mobile-friendly experience.
-- **Beginner/Recruiter Friendly:** Simple code structure, clear documentation, and easy to extend.
+- **Beginner Friendly:** Simple code structure, clear documentation, and easy to extend.
 
 ## Tech Stack
 - **Frontend:** React + TypeScript

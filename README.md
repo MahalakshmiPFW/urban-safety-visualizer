@@ -1,6 +1,6 @@
 # Urban Safety Visualizer
 
-A modern, recruiter-friendly React app for visualizing urban safety and crime risk by location. Enter any address to see real-time safety analysis and an interactive map.
+A modern, user-friendly React app for visualizing urban safety and crime risk by location. Enter any address to see real-time safety analysis and an interactive map.
 
 ## Features
 - **Location-based Safety Analysis:** Enter any address and get a risk assessment, crime stats, and safety tips.

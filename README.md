@@ -1,69 +1,39 @@
-# React + TypeScript + Vite
+# Urban Safety Visualizer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, recruiter-friendly React app for visualizing urban safety and crime risk by location. Enter any address to see real-time safety analysis and an interactive map.
 
-Currently, two official plugins are available:
+## Features
+- **Location-based Safety Analysis:** Enter any address and get a risk assessment, crime stats, and safety tips.
+- **Live Map:** Interactive map updates to the exact location using OpenStreetMap geocoding and Leaflet.
+- **Activity Detector:** Upload images to simulate AI-based suspicious activity detection (mocked for demo).
+- **Responsive UI:** Built with Tailwind CSS for a clean, mobile-friendly experience.
+- **Beginner/Recruiter Friendly:** Simple code structure, clear documentation, and easy to extend.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tech Stack
+- **Frontend:** React + TypeScript
+- **Styling:** Tailwind CSS
+- **Map:** Leaflet.js + React-Leaflet
+- **Icons:** lucide-react
+- **Geocoding:** OpenStreetMap Nominatim API (no API key required)
 
-## Expanding the ESLint configuration
+## How It Works
+1. Enter a location/address in the search box.
+2. The app geocodes the address and shows a risk assessment, crime stats, and safety tips.
+3. The map updates to the real location.
+4. Switch to the Activity Detector tab to upload an image and see mock AI analysis.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Future Plans
+- **Backend Integration:** Replace mock data with real crime datasets and APIs.
+- **AI/Deep Learning:** Integrate ML models for crime prediction and image analysis (YOLO, MobileNet, etc.).
+- **User Accounts:** Save favorite locations, get alerts, and personalize safety tips.
+- **Data Visualization:** Add charts, heatmaps, and historical trends.
+- **Mobile App:** React Native version for on-the-go safety checks.
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Getting Started
+1. `npm install`
+2. `npm run dev`
+3. Open [http://localhost:5173](http://localhost:5173) in your browser
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Built for learning, demos, and as a full-stack portfolio starter. Contributions welcome!

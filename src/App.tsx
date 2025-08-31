@@ -1,10 +1,10 @@
-
 import React, { useState, useRef } from 'react';
 import Header from './components/Header';
 import NavigationTabs from './components/NavigationTabs';
 import SafetyMap from './components/SafetyMap';
 import ActivityDetector from './components/ActivityDetector';
 import Footer from './components/Footer';
+import useCrimePredictor from './hooks/useCrimePredictor';  // ADD THIS LINE
 
 type CrimeData = {
   location: string;
@@ -36,46 +36,74 @@ const App: React.FC = () => {
   const [imageAnalysis, setImageAnalysis] = useState<ImageAnalysis | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Simulate fetching crime data
+  // ADD THESE LINES - Use the ML model hook
+  const { loading: mlLoading, error: mlModelError, predictRisk, isReady } = useCrimePredictor();
+  const [mlError, setMlError] = useState<string | null>(null);
+
+  // REPLACE your existing fetchCrimeData function with this one:
   const fetchCrimeData = async (searchLocation: string): Promise<CrimeData> => {
     setIsLoadingCrimeData(true);
-    // Geocode using OpenStreetMap Nominatim
-    let lat = 40.7128;
-    let lng = -74.0060;
+    setMlError(null);
+
     try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchLocation)}`);
-      const results = await response.json();
-      if (results && results.length > 0) {
-        lat = parseFloat(results[0].lat);
-        lng = parseFloat(results[0].lon);
+      // Get coordinates using geocoding (keep your existing code)
+      let lat = 40.7128;
+      let lng = -74.0060;
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchLocation)}`);
+        const results = await response.json();
+        if (results && results.length > 0) {
+          lat = parseFloat(results[0].lat);
+          lng = parseFloat(results[0].lon);
+        }
+      } catch (e) {
+        // fallback to NYC coordinates
       }
-    } catch (e) {
-      // fallback to NYC
+
+      // NEW: Get ML prediction if model is ready
+      let mlPrediction = null;
+      if (isReady) {
+        try {
+          mlPrediction = await predictRisk(searchLocation);
+          console.log('ML Prediction:', mlPrediction); // For debugging
+        } catch (error) {
+          console.error('ML prediction failed:', error);
+          setMlError('ML prediction unavailable');
+        }
+      }
+
+      // Keep your existing simulation delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const mockData: CrimeData = {
+        location: searchLocation,
+        // Use ML prediction if available, otherwise use your existing random logic
+        riskLevel: mlPrediction?.riskLevel || ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)],
+        confidence: mlPrediction?.confidence || Math.floor(Math.random() * 30) + 70,
+        recentCrimes: Math.floor(Math.random() * 50) + 10,
+        trendDirection: Math.random() > 0.5 ? 'increasing' : 'decreasing',
+        safetyScore: mlPrediction?.safetyScore || Math.floor(Math.random() * 40) + 60,
+        recommendations: mlPrediction?.recommendations || [
+          'Avoid walking alone after 10 PM',
+          'Well-lit main streets are safer',
+          'Police patrol frequency is high in this area',
+          'Consider using rideshare services at night'
+        ],
+        coordinates: {
+          lat,
+          lng
+        }
+      };
+      
+      setIsLoadingCrimeData(false);
+      return mockData;
+    } catch (error) {
+      setIsLoadingCrimeData(false);
+      throw error;
     }
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const mockData: CrimeData = {
-      location: searchLocation,
-      riskLevel: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)],
-      confidence: Math.floor(Math.random() * 30) + 70,
-      recentCrimes: Math.floor(Math.random() * 50) + 10,
-      trendDirection: Math.random() > 0.5 ? 'increasing' : 'decreasing',
-      safetyScore: Math.floor(Math.random() * 40) + 60,
-      recommendations: [
-        'Avoid walking alone after 10 PM',
-        'Well-lit main streets are safer',
-        'Police patrol frequency is high in this area',
-        'Consider using rideshare services at night'
-      ],
-      coordinates: {
-        lat,
-        lng
-      }
-    };
-    setIsLoadingCrimeData(false);
-    return mockData;
   };
 
-  // Simulate image analysis
+  // Keep all your existing functions unchanged:
   const analyzeImage = async (imageFile: File): Promise<ImageAnalysis> => {
     setIsAnalyzingImage(true);
     await new Promise(resolve => setTimeout(resolve, 3000));
@@ -97,7 +125,6 @@ const App: React.FC = () => {
     return mockAnalysis;
   };
 
-  // Event handlers
   const handleLocationSearch = async () => {
     if (!location.trim()) {
       alert('Please enter a location to analyze');
@@ -145,8 +172,23 @@ const App: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-6">
           <NavigationTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+          
+          {/* ADD THIS - ML Model Status Indicator */}
+          <div className="flex items-center space-x-2 text-sm">
+            <div className={`w-2 h-2 rounded-full ${
+              mlLoading ? 'bg-yellow-500 animate-pulse' : 
+              mlModelError ? 'bg-red-500' : 
+              isReady ? 'bg-green-500' : 'bg-gray-500'
+            }`}></div>
+            <span className="text-gray-600">
+              {mlLoading ? 'Loading ML Model...' : 
+               mlModelError ? 'ML Model Error' : 
+               isReady ? 'ML Model Ready' : 'ML Model Unavailable'}
+            </span>
+          </div>
         </div>
       </div>
+      
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
         {activeTab === 'map' && (
           <>
@@ -155,6 +197,17 @@ const App: React.FC = () => {
                 <div className="flex-1">
                   <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
                     Enter Location to Analyze
+                    {/* ADD THESE - Status indicators */}
+                    {isReady && (
+                      <span className="ml-2 text-xs text-green-600 font-normal">
+                        ✓ AI-Powered Predictions Enabled
+                      </span>
+                    )}
+                    {mlError && (
+                      <span className="ml-2 text-xs text-amber-600 font-normal">
+                        ⚠ Using fallback data
+                      </span>
+                    )}
                   </label>
                   <input
                     id="location"
